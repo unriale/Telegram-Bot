@@ -1,10 +1,10 @@
 import telebot
 import time
-from config import open_weather_token, telebot_token
+from config import open_weather_token, telebot_token, hello_messages, emoji
 import requests
 from pprint import pprint
 import datetime
-
+import random
 
 bot_token = telebot_token
 bot = telebot.TeleBot(token=bot_token)
@@ -12,7 +12,8 @@ bot = telebot.TeleBot(token=bot_token)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Welcome!")
+    bot.reply_to(
+        message, f"{random.choice(hello_messages)} {random.choice(emoji)}")
 
 
 @bot.message_handler(commands=['help'])
