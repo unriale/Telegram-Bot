@@ -4,10 +4,13 @@ from config import open_weather_token, telebot_token
 import requests
 from pprint import pprint
 import datetime
+from translate import Translator
 
 
 bot_token = telebot_token
 bot = telebot.TeleBot(token=bot_token)
+
+translator = Translator()
 
 
 @bot.message_handler(commands=['start'])
@@ -23,6 +26,15 @@ def send_welcome(message):
 @bot.message_handler(func=lambda msg: msg.text is not None and '@' in msg.text)
 def at_answer(message):
     bot.reply_to(message, "What should I say")
+
+
+@bot.message_handler(commands=['translate', 'tl'])
+@bot.message_handler(func=lambda msg: msg.forward_from)
+def translateText(message):
+    text = message.text if message.forward_from else ' '.join(message.text.split(' ')[1:])
+    translated = translator.translate(text, tl='en', sl='auto')
+    if len(translated) > 0:
+        bot.reply_to(message, translated)
 
 
 @bot.message_handler(commands=['weather'])
