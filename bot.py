@@ -23,16 +23,17 @@ def send_welcome(message):
 @bot.message_handler(func=lambda msg: msg.text is not None and '@' in msg.text)
 def at_answer(message):
     bot.reply_to(message, "What should I say")
-    get_weather("Lviv", open_weather_token)
 
 
-def get_weather(city, weather_token):
+@bot.message_handler(commands=['weather'])
+def get_weather(message):
     try:
+        city_list = list(filter(lambda x: '/' not in x, message.text.split()))
+        city_words = ' '.join([str(item) for item in city_list])
         r = requests.get(
-            f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={open_weather_token}&units=metric"
+            f"https://api.openweathermap.org/data/2.5/weather?q={city_words}&appid={open_weather_token}&units=metric"
         )
         data = r.json()
-        pprint(data)
 
         city = data["name"]
         temp = data["main"]["temp"]
@@ -45,8 +46,9 @@ def get_weather(city, weather_token):
             data["sys"]["sunrise"])
         sunset_timestamp = datetime.datetime.fromtimestamp(
             data["sys"]["sunset"])
-        print(
-            f"City: {city}, temp:{temp}, main_info: {main_info},  wind_speed={wind_speed}, sunsrise={sunsrise_timestamp}")
+        result = f"\n{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\n{main_info}, {round(temp)}°С\n{description}\nWind speed: {wind_speed}\nSunrise: {sunsrise_timestamp.strftime('%H:%M')}\nSunset: {sunset_timestamp.strftime('%H:%M')}"
+
+        bot.reply_to(message, result)
 
     except Exception as ex:
         print(ex)
